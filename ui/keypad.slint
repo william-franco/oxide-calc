@@ -20,7 +20,9 @@ export struct KeySpec {
 
 // Calculator key: pill that morphs to a rounded square while pressed; label scales with key size.
 export component CalcKey inherits OxideButton {
-    font-size: max(16px, min(32px, min(self.width, self.height) * 0.4));
+    in property <float> font-scale: 0.4;
+    font-size: max(14px, min(32px, min(self.width, self.height) * self.font-scale));
+    horizontal-padding: OxideSpacing.xs;
     font-weight: 400;
     icon-size: max(20px, min(28px, min(self.width, self.height) * 0.4));
     radius: min(self.width, self.height) / 2;
@@ -34,6 +36,7 @@ export component Keypad {
     in property <[KeySpec]> keys;
     in property <int> columns: 4;
     in property <length> gap: OxideSpacing.sm;
+    in property <float> font-scale: 0.4;
     callback activated(key: KeySpec);
 
     property <int> rows: ceil(root.keys.length / root.columns);
@@ -51,6 +54,7 @@ export component Keypad {
         text: key.label;
         icon: key.icon;
         variant: key.variant;
+        font-scale: root.font-scale;
         description: key.description;
         clicked => {
             root.activated(key);

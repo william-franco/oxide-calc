@@ -3175,7 +3175,7 @@ dependencies = [
 [[package]]
 name = "oxide-ui"
 version = "0.1.0"
-source = "git+https://github.com/william-franco/oxide-ui?branch=main#d36829a00c07aea2d1ebe3e33ff2a5a862da8adc"
+source = "git+https://github.com/william-franco/oxide-ui?branch=main#770c3a0dc2ac18e5dd44d76c57118987792b84cc"
 
 [[package]]
 name = "parking"

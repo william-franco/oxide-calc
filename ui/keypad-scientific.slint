@@ -5,6 +5,7 @@ export component ScientificKeypad inherits Keypad {
     in property <bool> degrees: true;
 
     columns: 5;
+    font-scale: 0.3;
     keys: [
         { label: root.degrees ? "DEG" : "RAD", action: KeyAction.angle, variant: OxideButtonVariant.outlined, description: root.degrees ? "Graus, alternar para radianos" : "Radianos, alternar para graus" },
         { label: "sin", token: "sin(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Seno" },
