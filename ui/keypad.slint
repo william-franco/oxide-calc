@@ -1,0 +1,59 @@
+import { OxideButton, OxideButtonVariant, OxideShape, OxideSpacing } from "@oxide/oxide.slint";
+
+export enum KeyAction {
+    input,
+    clear,
+    backspace,
+    sign,
+    equals,
+    angle,
+}
+
+export struct KeySpec {
+    label: string,
+    token: string,
+    action: KeyAction,
+    variant: OxideButtonVariant,
+    description: string,
+    icon: image,
+}
+
+// Calculator key: pill that morphs to a rounded square while pressed; label scales with key size.
+export component CalcKey inherits OxideButton {
+    font-size: max(16px, min(32px, min(self.width, self.height) * 0.4));
+    font-weight: 400;
+    icon-size: max(20px, min(28px, min(self.width, self.height) * 0.4));
+    radius: min(self.width, self.height) / 2;
+    pressed-radius: OxideShape.large;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+// Grid laid out by index, so key sets can be described as data and reflowed to any column count.
+export component Keypad {
+    in property <[KeySpec]> keys;
+    in property <int> columns: 4;
+    in property <length> gap: OxideSpacing.sm;
+    callback activated(key: KeySpec);
+
+    property <int> rows: ceil(root.keys.length / root.columns);
+    property <length> cell-width: (root.width - (root.columns - 1) * root.gap) / root.columns;
+    property <length> cell-height: (root.height - (root.rows - 1) * root.gap) / max(1, root.rows);
+
+    min-height: root.rows * 40px + (root.rows - 1) * root.gap;
+    min-width: root.columns * 40px + (root.columns - 1) * root.gap;
+
+    for key[index] in root.keys: CalcKey {
+        x: mod(index, root.columns) * (root.cell-width + root.gap);
+        y: floor(index / root.columns) * (root.cell-height + root.gap);
+        width: root.cell-width;
+        height: root.cell-height;
+        text: key.label;
+        icon: key.icon;
+        variant: key.variant;
+        description: key.description;
+        clicked => {
+            root.activated(key);
+        }
+    }
+}

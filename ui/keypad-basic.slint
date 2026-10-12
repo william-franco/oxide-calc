@@ -1,0 +1,28 @@
+import { OxideButtonVariant, OxideIcons } from "@oxide/oxide.slint";
+import { Keypad, KeySpec, KeyAction } from "keypad.slint";
+
+export component BasicKeypad inherits Keypad {
+    columns: 4;
+    keys: [
+        { label: "AC", action: KeyAction.clear, variant: OxideButtonVariant.tertiary, description: "Limpar" },
+        { label: "", icon: OxideIcons.backspace, action: KeyAction.backspace, variant: OxideButtonVariant.tonal, description: "Apagar" },
+        { label: "%", token: "%", action: KeyAction.input, variant: OxideButtonVariant.tonal, description: "Porcentagem" },
+        { label: "÷", token: "÷", action: KeyAction.input, variant: OxideButtonVariant.tonal, description: "Dividir" },
+        { label: "7", token: "7", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "7" },
+        { label: "8", token: "8", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "8" },
+        { label: "9", token: "9", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "9" },
+        { label: "×", token: "×", action: KeyAction.input, variant: OxideButtonVariant.tonal, description: "Multiplicar" },
+        { label: "4", token: "4", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "4" },
+        { label: "5", token: "5", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "5" },
+        { label: "6", token: "6", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "6" },
+        { label: "−", token: "−", action: KeyAction.input, variant: OxideButtonVariant.tonal, description: "Subtrair" },
+        { label: "1", token: "1", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "1" },
+        { label: "2", token: "2", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "2" },
+        { label: "3", token: "3", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "3" },
+        { label: "+", token: "+", action: KeyAction.input, variant: OxideButtonVariant.tonal, description: "Somar" },
+        { label: "±", action: KeyAction.sign, variant: OxideButtonVariant.surface, description: "Inverter sinal" },
+        { label: "0", token: "0", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "0" },
+        { label: ",", token: ".", action: KeyAction.input, variant: OxideButtonVariant.surface, description: "Vírgula decimal" },
+        { label: "=", action: KeyAction.equals, variant: OxideButtonVariant.filled, description: "Igual" },
+    ];
+}

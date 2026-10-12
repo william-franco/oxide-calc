@@ -1,6 +1,62 @@
 # Oxide Calc
 
-Lorem ipsum.
+Calculadora desktop para Linux em Rust + Slint, seguindo o Material Design 3. É o primeiro app do ecossistema **Oxide** e usa o design system [oxide-ui](https://github.com/william-franco/oxide-ui).
+
+## Funcionalidades
+
+- Modo básico: `+ − × ÷`, porcentagem (`200 + 10%` = 220), inverter sinal, apagar e limpar.
+- Modo científico: `sin cos tan` e inversas, `ln log`, `√ ∛`, `x² xʸ 10ˣ 1/x`, `x!`, `π e`, parênteses e graus/radianos.
+- Prévia do resultado durante a digitação. Os parênteses abertos são fechados automaticamente.
+- Histórico de até 100 itens: clique num item para reutilizar a expressão. O histórico pode ser limpo.
+- Tema claro e escuro. O tema inicial segue o sistema.
+- Layout responsivo:
+  - Abaixo de 600 px: o histórico abre em um painel inferior recolhível.
+  - De 600 a 839 px: as funções científicas ficam ao lado do teclado.
+  - A partir de 840 px: o histórico fica num painel lateral fixo.
+
+## Teclado
+
+| Tecla | Ação |
+|---|---|
+| `0-9` `.` `,` `+` `-` `*` `/` `^` `%` `!` `(` `)` | entrada |
+| `Enter` / `=` | calcular |
+| `Backspace` | apagar |
+| `Esc` / `Delete` | limpar (`Esc` fecha o histórico se ele estiver aberto) |
+| `s` `c` `t` `l` `g` `r` `p` `e` | sin, cos, tan, ln, log, √, π, e |
+| `h` | abrir/fechar histórico |
+| `Tab` / `Espaço` | navegar entre os botões / acionar o botão focado |
+
+## Arquitetura
+
+```
+src/engine/   motor puro (lexer, parser recursivo, avaliador, formatação, erros) + testes
+src/viewmodel.rs   estado da calculadora (expressão, prévia, erro, ângulo, histórico)
+src/bridge.rs      liga os callbacks Slint ao ViewModel
+ui/                telas Slint (app, teclados, histórico) usando @oxide/oxide.slint
+```
+
+Dependências:
+
+- `slint`: UI.
+- `slint-build`: compila os arquivos `.slint`.
+- `oxide-ui`: design system, consumido via git.
+
+O motor usa só `std`.
+
+## Compilar e executar (Linux)
+
+```
+sudo apt install libfontconfig1-dev libxkbcommon-dev libwayland-dev
+cargo run --release
+cargo test
+cargo update -p oxide-ui   # pega a versão mais nova do oxide-ui no GitHub
+```
+
+Para desenvolver o oxide-ui localmente ao mesmo tempo, sem alterar o `Cargo.toml`:
+
+```
+cargo run --config 'patch."https://github.com/william-franco/oxide-ui".oxide-ui.path="../oxide-ui"'
+```
 
 ## ScreenShots
 

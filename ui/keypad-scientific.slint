@@ -1,0 +1,30 @@
+import { OxideButtonVariant } from "@oxide/oxide.slint";
+import { Keypad, KeySpec, KeyAction } from "keypad.slint";
+
+export component ScientificKeypad inherits Keypad {
+    in property <bool> degrees: true;
+
+    columns: 5;
+    keys: [
+        { label: root.degrees ? "DEG" : "RAD", action: KeyAction.angle, variant: OxideButtonVariant.outlined, description: root.degrees ? "Graus, alternar para radianos" : "Radianos, alternar para graus" },
+        { label: "sin", token: "sin(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Seno" },
+        { label: "cos", token: "cos(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Cosseno" },
+        { label: "tan", token: "tan(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Tangente" },
+        { label: "(", token: "(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Abrir parêntese" },
+        { label: "sin⁻¹", token: "asin(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Arco seno" },
+        { label: "cos⁻¹", token: "acos(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Arco cosseno" },
+        { label: "tan⁻¹", token: "atan(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Arco tangente" },
+        { label: "x!", token: "!", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Fatorial" },
+        { label: ")", token: ")", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Fechar parêntese" },
+        { label: "ln", token: "ln(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Logaritmo natural" },
+        { label: "log", token: "log(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Logaritmo base 10" },
+        { label: "√", token: "√(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Raiz quadrada" },
+        { label: "∛", token: "∛(", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Raiz cúbica" },
+        { label: "1/x", token: "^(−1)", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Inverso" },
+        { label: "x²", token: "^2", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Ao quadrado" },
+        { label: "xʸ", token: "^", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Potência" },
+        { label: "10ˣ", token: "10^", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Dez elevado a" },
+        { label: "π", token: "π", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Pi" },
+        { label: "e", token: "e", action: KeyAction.input, variant: OxideButtonVariant.text, description: "Número de Euler" },
+    ];
+}

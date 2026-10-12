@@ -1,0 +1,237 @@
+import { Palette } from "std-widgets.slint";
+import {
+    OxideTheme, OxideType, OxideSpacing, OxideShape, OxideBreakpoints, OxideMotion, OxideIcons,
+    OxidePanel, OxideSurfaceTone, OxideDisplay, OxideIconButton, OxideSegmented, OxideScrim,
+} from "@oxide/oxide.slint";
+import { KeySpec, KeyAction } from "keypad.slint";
+import { BasicKeypad } from "keypad-basic.slint";
+import { ScientificKeypad } from "keypad-scientific.slint";
+import { HistoryPanel, HistoryItem } from "history-panel.slint";
+
+export { HistoryItem }
+
+export component AppWindow inherits Window {
+    title: "Oxide-calc";
+    min-width: 320px;
+    min-height: 560px;
+    preferred-width: 400px;
+    preferred-height: 700px;
+    background: OxideTheme.colors.surface;
+
+    in property <string> expression;
+    in property <string> secondary;
+    in property <bool> has-error;
+    in property <bool> degrees: true;
+    in property <[HistoryItem]> history;
+    in-out property <int> mode: 0;
+    in-out property <bool> history-open;
+
+    callback key(token: string);
+    callback keyboard(text: string) -> bool;
+    callback backspace();
+    callback clear();
+    callback toggle-sign();
+    callback equals();
+    callback toggle-angle();
+    callback reuse-history(index: int);
+    callback clear-history();
+
+    property <bool> scientific: root.mode == 1;
+    // Updated from `changed width` instead of a binding: the layout depends on these flags,
+    // and the window width depends on the layout, which would otherwise form a binding loop.
+    property <bool> medium;
+    property <bool> expanded;
+    property <bool> sheet-shown: root.history-open && !root.expanded;
+
+    function activate(spec: KeySpec) {
+        if (spec.action == KeyAction.input) {
+            root.key(spec.token);
+        } else if (spec.action == KeyAction.clear) {
+            root.clear();
+        } else if (spec.action == KeyAction.backspace) {
+            root.backspace();
+        } else if (spec.action == KeyAction.sign) {
+            root.toggle-sign();
+        } else if (spec.action == KeyAction.equals) {
+            root.equals();
+        } else if (spec.action == KeyAction.angle) {
+            root.toggle-angle();
+        }
+    }
+
+    function update-size-class() {
+        root.medium = root.width >= OxideBreakpoints.medium;
+        root.expanded = root.width >= OxideBreakpoints.expanded;
+    }
+
+    changed width => {
+        root.update-size-class();
+    }
+
+    init => {
+        root.update-size-class();
+        OxideTheme.dark = Palette.color-scheme == ColorScheme.dark;
+        keys.focus();
+    }
+
+    keys := FocusScope {
+        key-pressed(event) => {
+            if (event.modifiers.control || event.modifiers.alt || event.modifiers.meta) {
+                return reject;
+            }
+            if (event.text == Key.Escape && root.sheet-shown) {
+                root.history-open = false;
+                return accept;
+            }
+            if (event.text == "h") {
+                root.history-open = !root.history-open;
+                return accept;
+            }
+            if (root.keyboard(event.text)) {
+                return accept;
+            }
+            reject
+        }
+
+        HorizontalLayout {
+            padding: root.medium ? OxideSpacing.xl : OxideSpacing.lg;
+            spacing: OxideSpacing.lg;
+
+            VerticalLayout {
+                horizontal-stretch: 1;
+                spacing: OxideSpacing.md;
+
+                HorizontalLayout {
+                    spacing: OxideSpacing.xs;
+
+                    Text {
+                        text: "Oxide-calc";
+                        visible: root.width >= 440px;
+                        font-size: OxideType.title-large.size;
+                        color: OxideTheme.colors.on-surface;
+                        vertical-alignment: center;
+                        horizontal-stretch: 1;
+                    }
+
+                    OxideSegmented {
+                        options: ["Básico", "Científico"];
+                        selected <=> root.mode;
+                        description: "Modo da calculadora";
+                        width: 200px;
+                    }
+
+                    if !root.expanded: OxideIconButton {
+                        icon: OxideIcons.history;
+                        selected: root.history-open;
+                        description: "Histórico";
+                        clicked => {
+                            root.history-open = !root.history-open;
+                        }
+                    }
+
+                    OxideIconButton {
+                        icon: OxideTheme.dark ? OxideIcons.light-mode : OxideIcons.dark-mode;
+                        description: OxideTheme.dark ? "Usar tema claro" : "Usar tema escuro";
+                        clicked => {
+                            OxideTheme.dark = !OxideTheme.dark;
+                        }
+                    }
+                }
+
+                OxidePanel {
+                    tone: OxideSurfaceTone.high;
+                    radius: OxideShape.extra-large;
+                    min-height: 150px;
+                    vertical-stretch: 2;
+
+                    OxideDisplay {
+                        width: 100%;
+                        height: 100%;
+                        primary: root.expression;
+                        secondary: root.secondary;
+                        error: root.has-error;
+                        caption: root.scientific ? (root.degrees ? "DEG" : "RAD") : "";
+                        max-font-size: root.medium ? 64px : 52px;
+                        min-font-size: 24px;
+                    }
+                }
+
+                if root.scientific && !root.medium: ScientificKeypad {
+                    degrees: root.degrees;
+                    columns: 5;
+                    vertical-stretch: 3;
+                    activated(spec) => {
+                        root.activate(spec);
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: OxideSpacing.md;
+                    vertical-stretch: 5;
+
+                    if root.scientific && root.medium: ScientificKeypad {
+                        degrees: root.degrees;
+                        columns: 4;
+                        horizontal-stretch: 1;
+                        activated(spec) => {
+                            root.activate(spec);
+                        }
+                    }
+
+                    BasicKeypad {
+                        horizontal-stretch: 1;
+                        activated(spec) => {
+                            root.activate(spec);
+                        }
+                    }
+                }
+            }
+
+            if root.expanded: HistoryPanel {
+                min-width: 280px;
+                preferred-width: 340px;
+                max-width: 380px;
+                horizontal-stretch: 0;
+                level: 1;
+                items: root.history;
+                reuse(index) => {
+                    root.reuse-history(index);
+                }
+                clear => {
+                    root.clear-history();
+                }
+            }
+        }
+
+        OxideScrim {
+            shown: root.sheet-shown;
+            dismissed => {
+                root.history-open = false;
+            }
+        }
+
+        // Collapsible bottom sheet used below the expanded breakpoint.
+        sheet := HistoryPanel {
+            width: min(root.width, 560px);
+            height: root.height * 0.7;
+            x: (root.width - self.width) / 2;
+            y: root.sheet-shown ? root.height - self.height + OxideShape.extra-large : root.height + OxideSpacing.lg;
+            visible: !root.expanded && self.y < root.height;
+            level: 3;
+            closable: true;
+            items: root.history;
+            reuse(index) => {
+                root.reuse-history(index);
+                root.history-open = false;
+            }
+            clear => {
+                root.clear-history();
+            }
+            close => {
+                root.history-open = false;
+            }
+
+            animate y { duration: OxideMotion.long; easing: cubic-bezier(0.2, 0, 0, 1); }
+        }
+    }
+}

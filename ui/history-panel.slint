@@ -1,0 +1,85 @@
+import { ScrollView } from "std-widgets.slint";
+import {
+    OxideTheme, OxideType, OxideSpacing, OxideShape, OxideIcons,
+    OxidePanel, OxideSurfaceTone, OxideIconButton, OxideListItem, OxideDivider,
+} from "@oxide/oxide.slint";
+
+export struct HistoryItem {
+    expression: string,
+    result: string,
+}
+
+export component HistoryPanel inherits OxidePanel {
+    in property <[HistoryItem]> items;
+    in property <bool> closable;
+    callback reuse(index: int);
+    callback clear();
+    callback close();
+
+    tone: OxideSurfaceTone.low;
+    radius: OxideShape.extra-large;
+
+    VerticalLayout {
+        padding: OxideSpacing.sm;
+        spacing: OxideSpacing.xs;
+
+        HorizontalLayout {
+            padding-left: OxideSpacing.md;
+            spacing: OxideSpacing.xs;
+
+            Text {
+                text: "Histórico";
+                font-size: OxideType.title-large.size;
+                color: OxideTheme.colors.on-surface;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+
+            OxideIconButton {
+                icon: OxideIcons.delete;
+                description: "Limpar histórico";
+                enabled: root.items.length > 0;
+                clicked => {
+                    root.clear();
+                }
+            }
+
+            if root.closable: OxideIconButton {
+                icon: OxideIcons.close;
+                description: "Fechar histórico";
+                clicked => {
+                    root.close();
+                }
+            }
+        }
+
+        OxideDivider { }
+
+        if root.items.length == 0: Text {
+            text: "Nenhum cálculo ainda";
+            font-size: OxideType.body-large.size;
+            color: OxideTheme.colors.on-surface-variant;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            vertical-stretch: 1;
+        }
+
+        if root.items.length > 0: ScrollView {
+            vertical-stretch: 1;
+
+            VerticalLayout {
+                alignment: start;
+
+                for item[index] in root.items: OxideListItem {
+                    headline: item.result;
+                    supporting: item.expression + " =";
+                    text-alignment: right;
+                    description: item.expression + " igual a " + item.result + ". Reutilizar";
+                    clicked => {
+                        root.reuse(index);
+                    }
+                }
+            }
+        }
+    }
+}
