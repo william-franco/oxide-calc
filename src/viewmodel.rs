@@ -21,11 +21,25 @@ pub struct CalcViewModel {
     just_evaluated: bool,
     angle: AngleMode,
     history: Vec<HistoryEntry>,
+    /// Calculation added by the last successful `=`, waiting to be saved by the bridge.
+    last_entry: Option<HistoryEntry>,
 }
 
 impl CalcViewModel {
+    #[cfg(test)]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Starts with a history loaded from storage (most recent first).
+    pub fn with_history(mut history: Vec<HistoryEntry>) -> Self {
+        history.truncate(HISTORY_LIMIT);
+        Self { history, ..Self::default() }
+    }
+
+    /// Returns the calculation added by the last `=`, once.
+    pub fn take_last_entry(&mut self) -> Option<HistoryEntry> {
+        self.last_entry.take()
     }
 
     pub fn expression(&self) -> &str {
@@ -185,7 +199,9 @@ impl CalcViewModel {
                 let result = display_number(value);
                 let mut expression = std::mem::take(&mut self.expression);
                 expression.push_str(&")".repeat(open_parens(&expression)));
-                self.history.insert(0, HistoryEntry { expression, result: result.clone() });
+                let entry = HistoryEntry { expression, result: result.clone() };
+                self.last_entry = Some(entry.clone());
+                self.history.insert(0, entry);
                 self.history.truncate(HISTORY_LIMIT);
                 self.expression = result;
                 self.preview.clear();

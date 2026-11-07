@@ -7,8 +7,10 @@ import { KeySpec, KeyAction } from "keypad.slint";
 import { BasicKeypad } from "keypad-basic.slint";
 import { ScientificKeypad } from "keypad-scientific.slint";
 import { HistoryPanel, HistoryItem } from "history-panel.slint";
+import { SettingsPage } from "settings-page.slint";
 
 export { HistoryItem }
+export { OxideTheme } from "@oxide/oxide.slint";
 
 export component AppWindow inherits Window {
     title: "Oxide-calc";
@@ -25,6 +27,13 @@ export component AppWindow inherits Window {
     in property <[HistoryItem]> history;
     in-out property <int> mode: 0;
     in-out property <bool> history-open;
+
+    // ---- Settings ----------------------------------------------------------------------------
+    in property <string> app-version;
+    // True when the user already chose a theme; otherwise the system scheme is used.
+    in property <bool> theme-saved;
+    in-out property <bool> settings-open;
+    callback dark-changed(bool);
 
     callback key(token: string);
     callback keyboard(text: string) -> bool;
@@ -72,13 +81,20 @@ export component AppWindow inherits Window {
 
     init => {
         root.update-size-class();
-        OxideTheme.dark = Palette.color-scheme == ColorScheme.dark;
+        OxideTheme.dark = root.theme-saved ? OxideTheme.dark : Palette.color-scheme == ColorScheme.dark;
         keys.focus();
     }
 
     keys := FocusScope {
         key-pressed(event) => {
             if (event.modifiers.control || event.modifiers.alt || event.modifiers.meta) {
+                return reject;
+            }
+            if (root.settings-open) {
+                if (event.text == Key.Escape) {
+                    root.settings-open = false;
+                    return accept;
+                }
                 return reject;
             }
             if (event.text == Key.Escape && root.sheet-shown) {
@@ -135,10 +151,11 @@ export component AppWindow inherits Window {
                     }
 
                     OxideIconButton {
-                        icon: OxideTheme.dark ? OxideIcons.light-mode : OxideIcons.dark-mode;
-                        description: OxideTheme.dark ? "Usar tema claro" : "Usar tema escuro";
+                        icon: OxideIcons.settings;
+                        description: "Configurações";
+                        selected: root.settings-open;
                         clicked => {
-                            OxideTheme.dark = !OxideTheme.dark;
+                            root.settings-open = !root.settings-open;
                         }
                     }
                 }
@@ -205,6 +222,19 @@ export component AppWindow inherits Window {
                 clear => {
                     root.clear-history();
                 }
+            }
+        }
+
+        // Settings replaces the calculator while open.
+        if root.settings-open: SettingsPage {
+            width: 100%;
+            height: 100%;
+            app-version: root.app-version;
+            dark-changed(v) => {
+                root.dark-changed(v);
+            }
+            back => {
+                root.settings-open = false;
             }
         }
 
